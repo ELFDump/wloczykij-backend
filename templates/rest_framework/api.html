@@ -27,7 +27,9 @@
                 <li><a href='{% url 'rest_framework:logout' %}?next={{ request.path }}'><i>Log out</i></a></li>
             {% else %}
                 <li><a href='{% url 'rest_framework:login' %}?next={{ request.path }}'>Password (for admins)</a></li>
-                <li><a href='{% url 'allaccess-login' provider='google' %}?next={{ request.path }}'>Google</a></li>
+                {% for provider in allaccess_providers %}
+                    <li><a href='{% url 'allaccess-login' provider=provider.name %}?next={{ request.path }}'>{{ provider.name|title }}</a></li>
+                {% endfor %}
             {% endif %}
         </ul>
     </li>
