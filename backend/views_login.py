@@ -24,7 +24,7 @@ from requests import RequestException
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import NotAuthenticated, AuthenticationFailed
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
 
 logger = logging.getLogger(__name__)
 
@@ -78,24 +78,44 @@ class LoginCallback(OAuthCallback):
         return User.objects.create_user(**kwargs)
 
 
-class LoginToken(LoginCallback, APIView):
-    def get(self, request, *args, **kwargs):
-        name = kwargs.get('provider', None)
-        if not name:
-            return self.handle_token_response(request.user)
+class LoginToken(LoginCallback, ViewSet):
+    """
+    This endpoint is used to get token used to authenticate requests made by the app and serves as an entry point
+    for google/facebook login.
+
+    ---
+
+    When using google login, use the **/token/google/?token=&lt;your ID token&gt;** endpoint.
+
+    When using facebook login, use the **/token/facebook/?token=&lt;your auth token&gt;** endpoint.
+
+    If you are already logged in via other means (e.g. browser session in interactive docs), you can just
+    use **/token/** with no parameters to get your access token.
+
+    ---
+
+    The returned token value should be included in every following request in the Authorization header, like so:
+
+        Authorization: Token <token value here>
+    """
+
+    def list(self, request):
+        return self.handle_token_response(request.user)
+
+    def retrieve(self, request, pk=None):
         try:
-            provider = Provider.objects.get(name=name)
+            provider = Provider.objects.get(name=pk)
         except Provider.DoesNotExist:
             raise Http404('Unknown OAuth provider.')
         else:
             if not provider.enabled():
-                raise Http404('Provider %s is not enabled.' % name)
+                raise Http404('Provider %s is not enabled.' % provider.name)
 
             raw_token = None
             identifier = None
             info = None
             client = self.get_client(provider)
-            if name == 'facebook':
+            if provider.name == 'facebook':
                 # Fetch access token
                 if not 'token' in request.GET:
                     return self.handle_login_failure(provider, "Could not retrieve token.")
@@ -107,7 +127,7 @@ class LoginToken(LoginCallback, APIView):
                 identifier = self.get_user_id(provider, info)
                 if identifier is None:
                     return self.handle_login_failure(provider, "Could not determine id.")
-            elif name == 'google':
+            elif provider.name == 'google':
                 if not 'token' in request.GET:
                     return self.handle_login_failure(provider, "Could not retrieve token.")
                 id_token = request.GET['token']
@@ -124,7 +144,7 @@ class LoginToken(LoginCallback, APIView):
                 identifier = info['id'] = info['sub']
                 del info['sub']
             else:
-                self.handle_login_failure(provider, "Unsupported provider type %s" % name)
+                self.handle_login_failure(provider, "Unsupported provider type %s" % provider.name)
 
             # Get or create access record
             defaults = {
