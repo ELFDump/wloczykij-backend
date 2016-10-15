@@ -12,5 +12,5 @@ urlpatterns = [
     url(r'^', include('rest_framework.urls')),
     url(r'^login/(?P<provider>(\w|-)+)/$', views_login.LoginRedirect.as_view(), name='allaccess-login'),
     url(r'^logincallback/(?P<provider>(\w|-)+)/$', views_login.LoginCallback.as_view(), name='allaccess-callback'),
-    url(r'^gettoken/$', rest_framework.authtoken.views.obtain_auth_token, name='get-token')
+    url(r'^token/?(?P<provider>(\w|-)*)/$', views_login.LoginToken.as_view(), name='gettoken-login')
 ]
