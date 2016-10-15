@@ -1,4 +1,5 @@
 {% extends "rest_framework/base.html" %}
+{% load rest_framework %}
 
 {% block bootstrap_theme %}
     <link rel="stylesheet" href="http://bootswatch.com/cerulean/bootstrap.min.css" type="text/css">
@@ -6,4 +7,25 @@
 
 {% block branding %}
     <a class='navbar-brand' rel="nofollow" href="/">Włóczykij API</a>
+{% endblock %}
+
+{% block userlinks %}
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            {% if user.is_authenticated %}
+                {{ user }}
+            {% else %}
+                <i>Log in</i>
+            {% endif %}
+            <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+            {% if user.is_authenticated %}
+                <li><a href='{% url 'rest_framework:logout' %}?next={{ request.path }}'>Log out</a></li>
+            {% else %}
+                <li><a href='{% url 'rest_framework:login' %}?next={{ request.path }}'>Password (for admins)</a></li>
+                <li><a href='{% url 'allaccess-login' provider='google' %}?next={{ request.path }}'>Google</a></li>
+            {% endif %}
+        </ul>
+    </li>
 {% endblock %}
