@@ -21,7 +21,10 @@
         </a>
         <ul class="dropdown-menu">
             {% if user.is_authenticated %}
-                <li><a href='{% url 'rest_framework:logout' %}?next={{ request.path }}'>Log out</a></li>
+                {% if user.is_superuser %}
+                    <li><a href='{% url 'admin:index' %}'>Django admin</a></li>
+                {% endif %}
+                <li><a href='{% url 'rest_framework:logout' %}?next={{ request.path }}'><i>Log out</i></a></li>
             {% else %}
                 <li><a href='{% url 'rest_framework:login' %}?next={{ request.path }}'>Password (for admins)</a></li>
                 <li><a href='{% url 'allaccess-login' provider='google' %}?next={{ request.path }}'>Google</a></li>
