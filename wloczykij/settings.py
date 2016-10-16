@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
+import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -146,9 +147,16 @@ REST_FRAMEWORK = {
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'colored': {
+            'format': '\033[1;36m[%(levelname)s]\033[0m \033[0;33m[%(filename)s:%(lineno)s:%(funcName)s()]\033[0m %(message)s'
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'colored',
+            'stream': sys.stdout,
         },
     },
     'loggers': {
@@ -156,5 +164,9 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'INFO',
         },
+        'requests': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+        }
     },
 }

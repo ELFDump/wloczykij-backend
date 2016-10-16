@@ -5,11 +5,15 @@ import logging
 
 from allaccess.models import Provider, AccountAccess
 from allaccess.views import OAuthRedirect, OAuthCallback
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.http.response import Http404
 from django.utils.encoding import smart_bytes, force_text
-
+from requests import RequestException
+from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import NotAuthenticated, AuthenticationFailed
+from rest_framework.response import Response
+from rest_framework.viewsets import ViewSet
 
 # Google:
 # auth url: https://accounts.google.com/o/oauth2/auth
@@ -20,11 +24,6 @@ from django.utils.encoding import smart_bytes, force_text
 # auth url: https://www.facebook.com/dialog/oauth
 # token url: https://graph.facebook.com/oauth/access_token
 # profile url: https://graph.facebook.com/me?fields=email,first_name,last_name
-from requests import RequestException
-from rest_framework.authtoken.models import Token
-from rest_framework.exceptions import NotAuthenticated, AuthenticationFailed
-from rest_framework.response import Response
-from rest_framework.viewsets import ViewSet
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +99,7 @@ class LoginToken(LoginCallback, ViewSet):
     """
 
     def list(self, request):
-        return self.handle_token_response(request.user)
+        return self.handle_token_response('session', request.user)
 
     def retrieve(self, request, pk=None):
         try:
@@ -164,18 +163,19 @@ class LoginToken(LoginCallback, ViewSet):
 
     def handle_existing_user(self, provider, user, access, info):
         super(LoginToken, self).handle_existing_user(provider, user, access, info)
-        return self.handle_token_response(access.user)
+        return self.handle_token_response(provider.name, access.user)
 
     def handle_new_user(self, provider, access, info):
         super(LoginToken, self).handle_new_user(provider, access, info)
-        return self.handle_token_response(access.user)
+        return self.handle_token_response(provider.name, access.user)
 
     def handle_login_failure(self, provider, reason):
         raise AuthenticationFailed(detail=reason)
 
-    def handle_token_response(self, user):
+    def handle_token_response(self, provider_name, user):
         if not user.is_authenticated():
             raise NotAuthenticated()
+        logger.info("%s token request for user %s succeeded" % (provider_name, user.username))
         token, created = Token.objects.get_or_create(user=user)
         return Response({'token': token.key})
 
