@@ -6,7 +6,7 @@ from django.utils.encoding import force_bytes
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return force_bytes('#'+self.name)

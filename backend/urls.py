@@ -10,6 +10,7 @@ router.register(r'token', views_login.LoginToken, base_name='token')
 router.register(r'me', views.CurrentUserView, base_name='me')
 router.register(r'users', views.UserViewSet)
 router.register(r'places', views.PlaceViewSet)
+router.register(r'tags', views.TagViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),

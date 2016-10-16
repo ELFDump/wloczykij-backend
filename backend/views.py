@@ -3,8 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ViewSet, ModelViewSet
 
-from backend.models import Place
-from .serializers import UserSerializer, PlaceSerializer
+from backend.models import Place, Tag
+from .serializers import UserSerializer, PlaceSerializer, TagSerializer
 
 
 class UserViewSet(ReadOnlyModelViewSet):
@@ -36,3 +36,9 @@ class PlaceViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+class TagViewSet(ReadOnlyModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    lookup_field = 'name'
