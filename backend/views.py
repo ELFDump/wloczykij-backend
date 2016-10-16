@@ -33,3 +33,6 @@ class PlaceViewSet(ModelViewSet):
     # TODO: permissions
     queryset = Place.objects.all()
     serializer_class = PlaceSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)

@@ -1,7 +1,6 @@
 import six
 from django.contrib.gis.geos import Point
 from rest_framework import fields
-from rest_framework import relations
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
@@ -45,7 +44,7 @@ class PlaceSerializer(serializers.HyperlinkedModelSerializer):
     url = FixedHyperlinkedIdentityField(view_name='place-detail')
     author = serializers.ReadOnlyField(source='author.username')
     coords = LatLngField()
-    photos = PhotoSerializer(many=True)
+    photos = PhotoSerializer(many=True, read_only=True)
 
     class Meta:
         model = Place
