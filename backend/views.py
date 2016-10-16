@@ -1,9 +1,10 @@
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ReadOnlyModelViewSet, ViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet, ViewSet, ModelViewSet
 
-from .serializers import UserSerializer
+from backend.models import Place
+from .serializers import UserSerializer, PlaceSerializer
 
 
 class UserViewSet(ReadOnlyModelViewSet):
@@ -26,3 +27,9 @@ class CurrentUserView(ViewSet):
 
     def list(self, request):
         return Response(UserSerializer(request.user, context={'request': request}).data)
+
+
+class PlaceViewSet(ModelViewSet):
+    # TODO: permissions
+    queryset = Place.objects.all()
+    serializer_class = PlaceSerializer
