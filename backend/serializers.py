@@ -23,10 +23,10 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 class LatLngField(fields.Field):
     def to_representation(self, value):
-        return [value.x, value.y]
+        return [value.y, value.x]
 
     def to_internal_value(self, data):
-        return Point(data[0], data[1])
+        return Point(data[1], data[0])
 
 
 class PhotoSerializer(serializers.ModelSerializer):
