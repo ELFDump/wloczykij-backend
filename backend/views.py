@@ -6,10 +6,11 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet, ViewSet, ModelViewSet
 
 from backend.models import Place, Tag
+from backend.permissions import IsSelfOrReadOnly
 from .serializers import UserSerializer, PlaceSerializer, TagSerializer
 
 
-class UserViewSet(ReadOnlyModelViewSet):
+class UserViewSet(ModelViewSet):
     """
     This endpoint lists all users registered in the system
 
@@ -18,6 +19,7 @@ class UserViewSet(ReadOnlyModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (IsSelfOrReadOnly,)
 
 
 class CurrentUserView(APIView):
