@@ -11,5 +11,9 @@ class IsSelfOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
+        # Don't allow deletion
+        if request.method == 'DELETE':
+            return False
+
         # Write permissions are only allowed to the user himself
         return obj.pk == request.user.pk
