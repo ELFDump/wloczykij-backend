@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
+from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet, ViewSet, ModelViewSet
 
 from backend.models import Place, Tag
@@ -18,15 +20,29 @@ class UserViewSet(ReadOnlyModelViewSet):
     serializer_class = UserSerializer
 
 
-class CurrentUserView(ViewSet):
+class CurrentUserView(APIView):
     """
     This endpoint returns the currently logged in user.
     """
 
     permission_classes = (IsAuthenticated,)
 
-    def list(self, request):
-        return Response(UserSerializer(request.user, context={'request': request}).data)
+    def get(self, request):
+        return self.redirect(request)
+
+    def put(self, request):
+        return self.redirect(request)
+
+    def patch(self, request):
+        return self.redirect(request)
+
+    def delete(self, request):
+        return self.redirect(request)
+
+    def redirect(self, request):
+        response = Response(status=303)
+        response['Location'] = reverse('user-detail', args=[request.user.pk], request=request)
+        return response
 
 
 class PlaceViewSet(ModelViewSet):

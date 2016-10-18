@@ -1,13 +1,14 @@
 from django.conf.urls import url, include
 from django.conf.urls.static import static
-from rest_framework.routers import DefaultRouter
 
+from backend.routers import HybridRouter
 from wloczykij import settings
 from . import views, views_login
 
-router = DefaultRouter()
+
+router = HybridRouter()
 router.register(r'token', views_login.LoginToken, base_name='token')
-router.register(r'me', views.CurrentUserView, base_name='me')
+router.add_api_view('me', url(r'^me/$', views.CurrentUserView.as_view(), name='me'))
 router.register(r'users', views.UserViewSet)
 router.register(r'places', views.PlaceViewSet)
 router.register(r'tags', views.TagViewSet)
