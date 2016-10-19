@@ -61,7 +61,7 @@ class PlaceSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Place
-        fields = ('url', 'name', 'author', 'date_created', 'date_modified', 'coords', 'photos', 'photo_upload', 'tags')
+        fields = ('url', 'name', 'description', 'author', 'date_created', 'date_modified', 'coords', 'photos', 'photo_upload', 'tags')
 
     def create(self, validated_data):
         tags = validated_data['tags']

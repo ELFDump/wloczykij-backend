@@ -16,6 +16,7 @@ class Tag(models.Model):
 
 class Place(models.Model):
     name = models.CharField(max_length=300)
+    description = models.TextField(blank=True)
     tags = models.ManyToManyField(Tag)
     author = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, related_name='added_places')
     date_created = models.DateTimeField(auto_now_add=True)
