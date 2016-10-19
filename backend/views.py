@@ -23,6 +23,11 @@ class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = (IsSelfOrReadOnly,)
 
+    def perform_update(self, serializer):
+        user = serializer.save()
+        user.userprofile.first_login = False
+        user.userprofile.save()
+
 
 class CurrentUserView(APIView):
     """

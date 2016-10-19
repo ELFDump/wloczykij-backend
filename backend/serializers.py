@@ -16,9 +16,11 @@ class FixedHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
+    first_login = fields.ReadOnlyField(source='userprofile.first_login')
+
     class Meta:
         model = User
-        fields = ('url', 'username', 'first_name', 'last_name')
+        fields = ('url', 'username', 'first_login', 'first_name', 'last_name')
 
 
 class LatLngField(fields.Field):
