@@ -63,7 +63,10 @@ class PlaceViewSet(ModelViewSet):
         photo.photo = request.data['file']
         photo.place = self.get_object()
         photo.save()
-        return Response({'url': request.build_absolute_uri(photo.photo.url)})
+        return Response({
+            'url': request.build_absolute_uri(photo.photo.url),
+            'resized_url': request.build_absolute_uri(photo.photo.resized.url)
+        })
 
 
 class TagViewSet(ReadOnlyModelViewSet):

@@ -1,5 +1,7 @@
 import os
 import time
+
+import stdimage
 from django.db import models
 from django.contrib.gis.db import models as gis_models
 from django.utils.encoding import force_bytes
@@ -29,7 +31,7 @@ def photo_path(instance, filename):
 
 
 class Photo(models.Model):
-    photo = models.ImageField(upload_to=photo_path)
+    photo = stdimage.StdImageField(upload_to=photo_path, variations={'resized': {'width': 2048, 'height': 2048}})
     place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='photos')
 
     def __str__(self):

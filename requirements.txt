@@ -1,5 +1,6 @@
 Django==1.10.2
 django-all-access==0.8.0
+django-stdimage==2.3.3
 djangorestframework==3.4.7
 funcsigs==1.0.2
 Markdown==2.6.7
@@ -7,7 +8,9 @@ mock==2.0.0
 oauthlib==2.0.0
 pbr==1.10.0
 Pillow==3.4.1
+progressbar2==3.10.1
 pycrypto==2.6.1
+python-utils==2.0.0
 requests==2.11.1
 requests-oauthlib==0.7.0
 six==1.10.0

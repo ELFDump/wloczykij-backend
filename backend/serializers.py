@@ -34,7 +34,7 @@ class PhotoSerializer(serializers.ModelSerializer):
         model = Photo
 
     def to_representation(self, instance):
-        return self.context['request'].build_absolute_uri(instance.photo.url)
+        return self.context['request'].build_absolute_uri(instance.photo.resized.url)
 
     def to_internal_value(self, data):
         raise NotImplementedError('TODO')
