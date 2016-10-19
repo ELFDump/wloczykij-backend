@@ -56,11 +56,12 @@ class PlaceSerializer(serializers.HyperlinkedModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
     coords = LatLngField()
     photos = PhotoSerializer(many=True, read_only=True)
+    photo_upload = FixedHyperlinkedIdentityField(view_name='place-photo-upload')
     tags = TagSerializer(many=True)
 
     class Meta:
         model = Place
-        fields = ('url', 'name', 'author', 'date_created', 'date_modified', 'coords', 'photos', 'tags')
+        fields = ('url', 'name', 'author', 'date_created', 'date_modified', 'coords', 'photos', 'photo_upload', 'tags')
 
     def create(self, validated_data):
         tags = validated_data['tags']

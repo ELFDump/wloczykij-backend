@@ -1,11 +1,13 @@
 from django.contrib.auth.models import User
+from rest_framework.decorators import detail_route
+from rest_framework.parsers import FileUploadParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
-from rest_framework.viewsets import ReadOnlyModelViewSet, ViewSet, ModelViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 
-from backend.models import Place, Tag
+from backend.models import Place, Tag, Photo
 from backend.permissions import IsSelfOrReadOnly
 from .serializers import UserSerializer, PlaceSerializer, TagSerializer
 
@@ -54,6 +56,14 @@ class PlaceViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    @detail_route(methods=['post'], parser_classes=[FileUploadParser])
+    def photo_upload(self, request, pk=None):
+        photo = Photo()
+        photo.photo = request.data['file']
+        photo.place = self.get_object()
+        photo.save()
+        return Response({'url': request.build_absolute_uri(photo.photo.url)})
 
 
 class TagViewSet(ReadOnlyModelViewSet):
