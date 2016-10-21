@@ -15,31 +15,12 @@ class FixedHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
         return six.text_type(str(obj), 'utf-8')
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    first_login = fields.ReadOnlyField(source='userprofile.first_login')
-
-    class Meta:
-        model = User
-        fields = ('url', 'username', 'first_login', 'first_name', 'last_name')
-
-
 class LatLngField(fields.Field):
     def to_representation(self, value):
         return [value.y, value.x]
 
     def to_internal_value(self, data):
         return Point(data[1], data[0])
-
-
-class PhotoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Photo
-
-    def to_representation(self, instance):
-        return self.context['request'].build_absolute_uri(instance.photo.resized.url)
-
-    def to_internal_value(self, data):
-        raise NotImplementedError('TODO')
 
 
 class TagNameSerializer(serializers.ModelSerializer):
@@ -60,6 +41,26 @@ class TagSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Place
         fields = ('url', 'name', 'place_count')
+
+
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    first_login = fields.ReadOnlyField(source='userprofile.first_login')
+    followed_tags = TagNameSerializer(source='userprofile.followed_tags', many=True)
+
+    class Meta:
+        model = User
+        fields = ('url', 'username', 'first_login', 'first_name', 'last_name', 'followed_tags')
+
+
+class PhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Photo
+
+    def to_representation(self, instance):
+        return self.context['request'].build_absolute_uri(instance.photo.resized.url)
+
+    def to_internal_value(self, data):
+        raise NotImplementedError('TODO')
 
 
 class PlaceSerializer(serializers.HyperlinkedModelSerializer):

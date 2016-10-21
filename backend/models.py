@@ -12,6 +12,7 @@ from django.utils.encoding import force_bytes
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
     first_login = models.BooleanField(default=True)
+    followed_tags = models.ManyToManyField('Tag', related_name='followers')
 
     def __str__(self):
         return force_bytes("%s's profile" % self.user)
