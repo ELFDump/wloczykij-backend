@@ -51,6 +51,22 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         model = User
         fields = ('url', 'username', 'first_login', 'first_name', 'last_name', 'followed_tags')
 
+    def create(self, validated_data):
+        raise NotImplementedError('No creation via JSON')
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            if attr == 'userprofile':
+                continue
+            setattr(instance, attr, value)
+
+        instance.userprofile.followed_tags.clear()
+        for tagname in validated_data['userprofile']['followed_tags']:
+            instance.userprofile.followed_tags.add(Tag.objects.get(name=tagname))
+        instance.userprofile.save()
+
+        return instance
+
 
 class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
