@@ -42,7 +42,7 @@ class PhotoSerializer(serializers.ModelSerializer):
         raise NotImplementedError('TODO')
 
 
-class TagSerializer(serializers.ModelSerializer):
+class TagNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
 
@@ -53,13 +53,22 @@ class TagSerializer(serializers.ModelSerializer):
         return data
 
 
+class TagSerializer(serializers.HyperlinkedModelSerializer):
+    url = FixedHyperlinkedIdentityField(view_name='tag-detail', lookup_field='name')
+    place_count = serializers.ReadOnlyField(source='place_set.count')
+
+    class Meta:
+        model = Place
+        fields = ('url', 'name', 'place_count')
+
+
 class PlaceSerializer(serializers.HyperlinkedModelSerializer):
     url = FixedHyperlinkedIdentityField(view_name='place-detail')
     author = serializers.ReadOnlyField(source='author.username')
     coords = LatLngField()
     photos = PhotoSerializer(many=True, read_only=True)
     photo_upload = FixedHyperlinkedIdentityField(view_name='place-photo-upload')
-    tags = TagSerializer(many=True)
+    tags = TagNameSerializer(many=True)
 
     class Meta:
         model = Place
