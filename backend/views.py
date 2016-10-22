@@ -1,4 +1,7 @@
+import logging
+
 from django.contrib.auth.models import User
+from rest_framework import exceptions
 from rest_framework.decorators import detail_route
 from rest_framework.parsers import FileUploadParser
 from rest_framework.permissions import IsAuthenticated
@@ -7,9 +10,9 @@ from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 
-from backend.models import Place, Tag, Photo
+from backend.models import Place, Tag, Photo, Visit
 from backend.permissions import IsSelfOrReadOnly
-from .serializers import UserSerializer, PlaceSerializer, TagSerializer
+from .serializers import UserSerializer, PlaceSerializer, TagSerializer, VisitSerializer
 
 
 class UserViewSet(ModelViewSet):
@@ -72,6 +75,26 @@ class PlaceViewSet(ModelViewSet):
             'url': request.build_absolute_uri(photo.photo.url),
             'resized_url': request.build_absolute_uri(photo.photo.resized.url)
         })
+
+    @detail_route(methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], serializer_class=VisitSerializer)
+    def visit(self, request, pk=None):
+        instance = None
+        try:
+            instance = Visit.objects.get(place_id=pk, visitor=request.user)
+            if request.method == 'POST':
+                raise exceptions.MethodNotAllowed(method=request.method)
+        except Visit.DoesNotExist:
+            if request.method in ['PUT', 'PATCH', 'DELETE']:
+                raise exceptions.MethodNotAllowed(method=request.method)
+
+        serializer = VisitSerializer(instance, data=request.data, partial=(request.method == 'PATCH'), context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(place_id=pk, visitor=request.user)
+
+        if request.method == 'DELETE':
+            instance.delete()
+
+        return Response(serializer.data)
 
 
 class TagViewSet(ReadOnlyModelViewSet):

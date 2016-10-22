@@ -1,10 +1,11 @@
 import six
 from django.contrib.gis.geos import Point
+from django.db.models import Avg
 from rest_framework import fields
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
-from backend.models import Place, Photo, Tag
+from backend.models import Place, Photo, Tag, Visit
 
 
 class FixedHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
@@ -79,6 +80,14 @@ class PhotoSerializer(serializers.ModelSerializer):
         raise NotImplementedError('TODO')
 
 
+class VisitSerializer(serializers.HyperlinkedModelSerializer):
+    url = serializers.HyperlinkedRelatedField(view_name='place-visit', source='place', read_only=True)
+
+    class Meta:
+        model = Visit
+        fields = ('url', 'date_visited', 'rating')
+
+
 class PlaceSerializer(serializers.HyperlinkedModelSerializer):
     url = FixedHyperlinkedIdentityField(view_name='place-detail')
     author = serializers.ReadOnlyField(source='author.username')
@@ -86,10 +95,28 @@ class PlaceSerializer(serializers.HyperlinkedModelSerializer):
     photos = PhotoSerializer(many=True, read_only=True)
     photo_upload = FixedHyperlinkedIdentityField(view_name='place-photo-upload')
     tags = TagNameSerializer(many=True)
+    visit_url = FixedHyperlinkedIdentityField(view_name='place-visit')
+    visit = serializers.SerializerMethodField()
+    rating_avg = serializers.SerializerMethodField()
+    rating_count = serializers.SerializerMethodField()
+    visit_count = serializers.ReadOnlyField(source='visits.count')
+
+    def get_visit(self, instance):
+        try:
+            visit = Visit.objects.get(place=instance, visitor=self.context['request'].user)
+            return VisitSerializer(visit, context=self.context).data
+        except Visit.DoesNotExist:
+            return None
+
+    def get_rating_avg(self, instance):
+        return instance.visits.exclude(rating=0).aggregate(Avg('rating'))['rating__avg']
+
+    def get_rating_count(self, instance):
+        return instance.visits.exclude(rating=0).count()
 
     class Meta:
         model = Place
-        fields = ('url', 'name', 'description', 'author', 'date_created', 'date_modified', 'coords', 'photos', 'photo_upload', 'tags')
+        fields = ('url', 'name', 'description', 'author', 'date_created', 'date_modified', 'coords', 'photos', 'photo_upload', 'tags', 'visit_url', 'visit', 'rating_avg', 'rating_count', 'visit_count')
 
     def create(self, validated_data):
         tags = validated_data['tags']

@@ -57,10 +57,23 @@ class Photo(models.Model):
         return force_bytes('Photo for ' + str(self.place))
 
 
+RATINGS = (
+    (0, '---'),
+    (1, '*'),
+    (2, '**'),
+    (3, '***'),
+    (4, '****'),
+)
+
+
 class Visit(models.Model):
     place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='visits')
     visitor = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='visited_places')
     date_visited = models.DateTimeField(auto_now_add=True)
+    rating = models.IntegerField(default=0, blank=True, choices=RATINGS)
+
+    class Meta:
+        unique_together = ['place', 'visitor']
 
     def __str__(self):
         return force_bytes(str(self.visitor) + '\'s visit to ' + str(self.place) + ' at ' + str(self.date_visited))
