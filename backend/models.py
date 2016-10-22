@@ -16,7 +16,7 @@ from stdimage.utils import render_variations
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
     first_login = models.BooleanField(default=True)
-    followed_tags = models.ManyToManyField('Tag', related_name='followers')
+    followed_tags = models.ManyToManyField('Tag', blank=True, related_name='followers')
 
     def __str__(self):
         return force_bytes("%s's profile" % self.user)
