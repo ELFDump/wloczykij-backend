@@ -1,9 +1,9 @@
 import six
+from django.contrib.auth.models import User
 from django.contrib.gis.geos import Point
 from django.db.models import Avg
 from rest_framework import fields
 from rest_framework import serializers
-from django.contrib.auth.models import User
 
 from backend.models import Place, Photo, Tag, Visit
 
@@ -38,10 +38,11 @@ class TagNameSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.HyperlinkedModelSerializer):
     url = FixedHyperlinkedIdentityField(view_name='tag-detail', lookup_field='name')
     place_count = serializers.ReadOnlyField(source='place_set.count')
+    parent = serializers.HyperlinkedRelatedField(view_name='tag-detail', lookup_field='name', read_only=True)
 
     class Meta:
-        model = Place
-        fields = ('url', 'name', 'place_count')
+        model = Tag
+        fields = ('url', 'name', 'place_count', 'parent')
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):

@@ -27,6 +27,7 @@ post_save.connect(create_user_profile, sender=User)
 
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name='children')
 
     def __str__(self):
         return force_bytes('#'+self.name)
