@@ -38,7 +38,7 @@ class TagNameSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.HyperlinkedModelSerializer):
     url = FixedHyperlinkedIdentityField(view_name='tag-detail')
     place_count = serializers.ReadOnlyField(source='place_set.count')
-    parent = serializers.HyperlinkedRelatedField(view_name='tag-detail', read_only=True)
+    parent = TagNameSerializer()
 
     class Meta:
         model = Tag
