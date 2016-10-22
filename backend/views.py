@@ -89,7 +89,8 @@ class PlaceViewSet(ModelViewSet):
 
         serializer = VisitSerializer(instance, data=request.data, partial=(request.method == 'PATCH'), context={'request': request})
         serializer.is_valid(raise_exception=True)
-        serializer.save(place_id=pk, visitor=request.user)
+        if request.method != 'GET':
+            serializer.save(place_id=pk, visitor=request.user)
 
         if request.method == 'DELETE':
             instance.delete()
