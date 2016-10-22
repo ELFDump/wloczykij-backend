@@ -102,6 +102,9 @@ class PlaceSerializer(serializers.HyperlinkedModelSerializer):
     visit_count = serializers.ReadOnlyField(source='visits.count')
 
     def get_visit(self, instance):
+        if not self.context['request'].user.is_authenticated():
+            return None
+
         try:
             visit = Visit.objects.get(place=instance, visitor=self.context['request'].user)
             return VisitSerializer(visit, context=self.context).data
