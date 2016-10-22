@@ -118,7 +118,7 @@ class LoginToken(LoginCallback, ViewSet):
                 # Fetch access token
                 if not 'token' in request.GET:
                     return self.handle_login_failure(provider, "Could not retrieve token.")
-                raw_token = request.GET['token']
+                raw_token = "access_token=" + request.GET['token']
                 # Fetch profile info
                 info = client.get_profile_info(raw_token)
                 if info is None:
