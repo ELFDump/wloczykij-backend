@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 
@@ -59,27 +60,29 @@ def photo_render_variations(file_name, variations, storage):
     with storage.open(file_name) as f:
         with Image.open(f) as image:
             file_format = image.format
-            exif = image._getexif()
+            logging.info('File format: ' + file_format)
+            if file_format == 'JPEG':
+                exif = image._getexif()
 
-            # if image has exif data about orientation, let's rotate it
-            orientation_key = 274  # cf ExifTags
-            if exif and orientation_key in exif:
-                orientation = exif[orientation_key]
+                # if image has exif data about orientation, let's rotate it
+                orientation_key = 274  # cf ExifTags
+                if exif and orientation_key in exif:
+                    orientation = exif[orientation_key]
 
-                rotate_values = {
-                    3: Image.ROTATE_180,
-                    6: Image.ROTATE_270,
-                    8: Image.ROTATE_90
-                }
+                    rotate_values = {
+                        3: Image.ROTATE_180,
+                        6: Image.ROTATE_270,
+                        8: Image.ROTATE_90
+                    }
 
-                if orientation in rotate_values:
-                    image = image.transpose(rotate_values[orientation])
+                    if orientation in rotate_values:
+                        image = image.transpose(rotate_values[orientation])
 
-                file_buffer = BytesIO()
-                image.save(file_buffer, file_format)
-                f = ContentFile(file_buffer.getvalue())
-                storage.delete(file_name)
-                storage.save(file_name, f)
+                    file_buffer = BytesIO()
+                    image.save(file_buffer, file_format)
+                    f = ContentFile(file_buffer.getvalue())
+                    storage.delete(file_name)
+                    storage.save(file_name, f)
 
     # render stdimage variations
     render_variations(file_name, variations, replace=True, storage=storage)

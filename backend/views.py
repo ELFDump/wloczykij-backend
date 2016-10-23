@@ -1,5 +1,3 @@
-import logging
-
 from django.contrib.auth.models import User
 from rest_framework import exceptions
 from rest_framework.decorators import detail_route
