@@ -1,3 +1,5 @@
+import logging
+
 import six
 from django.contrib.auth.models import User
 from django.contrib.gis.geos import Point
@@ -61,6 +63,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             if attr == 'userprofile':
                 continue
             setattr(instance, attr, value)
+
+        instance.save()
 
         instance.userprofile.followed_tags.clear()
         for tagname in validated_data['userprofile']['followed_tags']:
