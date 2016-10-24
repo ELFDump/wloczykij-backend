@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import exceptions
 from rest_framework.decorators import detail_route
 from rest_framework.parsers import FileUploadParser
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
@@ -59,6 +59,8 @@ class PlaceViewSet(ModelViewSet):
     # TODO: permissions
     queryset = Place.objects.all()
     serializer_class = PlaceSerializer
+
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
