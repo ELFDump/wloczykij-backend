@@ -95,6 +95,17 @@ class PlaceViewSet(ModelViewSet):
 
         return Response(serializer.data)
 
+    @detail_route(methods=['GET', 'PUT', 'DELETE'])
+    def save(self, request, pk=None):
+        instance = self.get_object()
+
+        if request.method == 'PUT':
+            request.user.userprofile.saved_places.add(instance)
+        if request.method == 'DELETE':
+            request.user.userprofile.saved_places.remove(instance)
+
+        return Response(request.user.userprofile.saved_places.filter(pk=instance.pk).exists())
+
 
 class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()

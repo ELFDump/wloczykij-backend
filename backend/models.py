@@ -18,6 +18,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User)
     first_login = models.BooleanField(default=True)
     followed_tags = models.ManyToManyField('Tag', blank=True, related_name='followers')
+    saved_places = models.ManyToManyField('Place', blank=True, related_name='saved_by')
 
     def __str__(self):
         return force_bytes("%s's profile" % self.user)

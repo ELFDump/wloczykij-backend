@@ -10,10 +10,12 @@ from rest_framework import serializers
 from backend.models import Place, Photo, Tag, Visit
 
 
+# TODO: HyperlinkedIdentityField and HyperlinkedRelatedField have some problems with utf-8 which look like a bug in Django REST Framework
+# We'll use these class as a temporary fix
 class FixedHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
-    # TODO: HyperlinkedIdentityField has some problems with utf-8 which look like a bug in Django REST Framework
-    # We'll use this class as a temporary fix
-
+    def get_name(self, obj):
+        return six.text_type(str(obj), 'utf-8')
+class FixedHyperlinkedRelatedField(serializers.HyperlinkedRelatedField):
     def get_name(self, obj):
         return six.text_type(str(obj), 'utf-8')
 
@@ -50,10 +52,18 @@ class TagSerializer(serializers.HyperlinkedModelSerializer):
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     first_login = fields.ReadOnlyField(source='userprofile.first_login')
     followed_tags = TagNameSerializer(source='userprofile.followed_tags', many=True)
+    saved_places = FixedHyperlinkedRelatedField(view_name='place-detail', source='userprofile.saved_places', many=True, read_only=True)
 
     class Meta:
         model = User
-        fields = ('url', 'username', 'first_login', 'first_name', 'last_name', 'followed_tags')
+        fields = ('url', 'username', 'first_login', 'first_name', 'last_name', 'followed_tags', 'saved_places')
+
+    def to_representation(self, instance):
+        data = super(UserSerializer, self).to_representation(instance)
+        if self.context['request'].user != instance:
+            del data['followed_tags']
+            del data['saved_places']
+        return data
 
     def create(self, validated_data):
         raise NotImplementedError('No creation via JSON')
@@ -105,6 +115,7 @@ class PlaceSerializer(serializers.HyperlinkedModelSerializer):
     rating_avg = serializers.SerializerMethodField()
     rating_count = serializers.SerializerMethodField()
     visit_count = serializers.ReadOnlyField(source='visits.count')
+    save_url = FixedHyperlinkedIdentityField(view_name='place-save')
 
     def get_visit(self, instance):
         if not self.context['request'].user.is_authenticated():
@@ -124,7 +135,7 @@ class PlaceSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Place
-        fields = ('url', 'name', 'description', 'author', 'date_created', 'date_modified', 'coords', 'photos', 'photo_upload', 'tags', 'visit_url', 'visit', 'rating_avg', 'rating_count', 'visit_count')
+        fields = ('url', 'name', 'description', 'author', 'date_created', 'date_modified', 'coords', 'photos', 'photo_upload', 'tags', 'visit_url', 'visit', 'rating_avg', 'rating_count', 'visit_count', 'save_url')
 
     def create(self, validated_data):
         tags = validated_data['tags']
